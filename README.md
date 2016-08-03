@@ -12,9 +12,6 @@ To use the client library in your own application, simply host Speech.1.0.0.js o
 ## The Sample
 The Oxford.Speech.JS sample demonstrates how to use the Microsoft Bing Speech API in a web application. It features using a .wav file or external microphone input to perform:
  * Short-form recognition
- * Long-form dictation
- * Recognition with intent
-
 
 ### Build the Sample
  1. First, you must obtain a Bing Speech API subscription key by [following the instructions on our webiste](<https://www.microsoft.com/cognitive-services/en-us/sign-up>).
@@ -32,11 +29,7 @@ The Oxford.Speech.JS sample demonstrates how to use the Microsoft Bing Speech AP
 ### Running the Sample
  1. In the web application, enter your Bing Speech subscription key under "Oxford Key".
 
- 2. Select whether you would like to use the Microphone and what speech mode you would like to use by select "Use Microphone" and the "Mode" drop down box.
-
- 3. For modes where you would like both Speech recognition and Intent to work, you need to sign up [Language Understanding Intelligent Service (LUIS)](<https://www.microsoft.com/cognitive-services/en-us/sign-up>) and set the key values in the fields "Luis AppID" and "LUIS SubscriptionId".
-
- 4. To Start recognition, press the Start button.
+ 2. To Start recognition, press the Start button.
 
   <img src="SampleScreenshots/SampleRunning1.png"/>
 
