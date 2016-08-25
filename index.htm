@@ -34,16 +34,11 @@ document is confidential and proprietary to Microsoft. It is disclosed and can b
         }
 
         function getMode() {
-            switch (document.getElementById("mode").value) {
-                case "longDictation":
-                    return Microsoft.ProjectOxford.SpeechRecognition.SpeechRecognitionMode.longDictation;
-                default:
-                    return Microsoft.ProjectOxford.SpeechRecognition.SpeechRecognitionMode.shortPhrase;
-            }
+            return Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase;
         }
 
-        function getOxfordKey() {
-            return document.getElementById("oxfordkey").value;
+        function getKey() {
+            return document.getElementById("key").value;
         }
 
         function getLanguage() {
@@ -77,18 +72,16 @@ document is confidential and proprietary to Microsoft. It is disclosed and can b
 
             if (useMic()) {
                 if (luisCfg) {
-                    client = Microsoft.ProjectOxford.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClientWithIntent(
+                    client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClientWithIntent(
                         getLanguage(),
-                        getOxfordKey(),
-                        getOxfordKey(),
+                        getKey(),
                         luisCfg.appid,
                         luisCfg.subid);
                 } else {
-                    client = Microsoft.ProjectOxford.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
+                    client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
                         mode,
                         getLanguage(),
-                        getOxfordKey(),
-                        getOxfordKey());
+                        getKey());
                 }
                 client.startMicAndRecognition();
                 setTimeout(function () {
@@ -96,23 +89,21 @@ document is confidential and proprietary to Microsoft. It is disclosed and can b
                 }, 5000);
             } else {
                 if (luisCfg) {
-                    client = Microsoft.ProjectOxford.SpeechRecognition.SpeechRecognitionServiceFactory.createDataClientWithIntent(
+                    client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createDataClientWithIntent(
                         getLanguage(),
-                        getOxfordKey(),
-                        getOxfordKey(),
+                        getKey(),
                         luisCfg.appid,
                         luisCfg.subid);
                 } else {
-                    client = Microsoft.ProjectOxford.SpeechRecognition.SpeechRecognitionServiceFactory.createDataClient(
+                    client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createDataClient(
                         mode,
                         getLanguage(),
-                        getOxfordKey(),
-                        getOxfordKey());
+                        getKey());
                 }
                 request = new XMLHttpRequest();
                 request.open(
                     'GET',
-                    (mode == Microsoft.ProjectOxford.SpeechRecognition.SpeechRecognitionMode.shortPhrase) ? "whatstheweatherlike.wav" : "batman.wav",
+                    (mode == Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase) ? "whatstheweatherlike.wav" : "batman.wav",
                     true);
                 request.responseType = 'arraybuffer';
                 request.onload = function () {
@@ -148,16 +139,8 @@ document is confidential and proprietary to Microsoft. It is disclosed and can b
             <td><input id="useMic" type="checkbox">Use Microphone</td>
         </tr>
         <tr>
-            <td align="right">Mode:</td>
-            <td>
-                <select id="mode">
-                    <option selected="selected">shortPhrase</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
             <td align="right"><A href="https://www.microsoft.com/cognitive-services/en-us/sign-up" target="_blank">Subscription</A>:</td>
-            <td><input id="oxfordkey" type="text" size="40"></td>
+            <td><input id="key" type="text" size="40"></td>
         </tr>
         <tr>
             <td align="right">LUIS AppId:</td>

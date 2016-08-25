@@ -65,7 +65,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="index.htm" />
+    <Content Include="speech.1.0.0.js" />
+    <Content Include="speech.1.0.0.min.js" />
     <Content Include="Web.config" />
+    <Content Include="whatstheweatherlike.wav" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

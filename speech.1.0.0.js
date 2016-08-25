@@ -22,7 +22,7 @@
 
 var Microsoft;
 (function (Microsoft) {
-    (function (ProjectOxford) {
+    (function (CognitiveServices) {
         (function (SpeechRecognition) {
             (function (SpeechRecognitionMode) {
                 SpeechRecognitionMode._map = [];
@@ -116,40 +116,38 @@ var Microsoft;
             SpeechRecognition.DataRecognitionClient = DataRecognitionClient;            
             (function (SpeechRecognitionServiceFactory) {
                 function createDataClient(speechRecognitionMode, language, primaryKey, secondaryKey) {
-                    return new SpeechRecognition.DataRecognitionClient(createPrefs(speechRecognitionMode, language, primaryKey, secondaryKey));
+                    return new SpeechRecognition.DataRecognitionClient(createPrefs(speechRecognitionMode, language, primaryKey));
                 }
                 SpeechRecognitionServiceFactory.createDataClient = createDataClient;
-                function createDataClientWithIntent(language, primaryKey, secondaryKey, luisAppId, luisSubscriptionId) {
-                    var prefs = createPrefs(SpeechRecognition.SpeechRecognitionMode.shortPhrase, language, primaryKey, secondaryKey);
+                function createDataClientWithIntent(language, primaryKey, luisAppId, luisSubscriptionId) {
+                    var prefs = createPrefs(SpeechRecognition.SpeechRecognitionMode.shortPhrase, language, primaryKey);
                     prefs.luisAppId = luisAppId;
                     prefs.luisSubscriptionId = luisSubscriptionId;
                     return new SpeechRecognition.DataRecognitionClient(prefs);
                 }
                 SpeechRecognitionServiceFactory.createDataClientWithIntent = createDataClientWithIntent;
                 function createMicrophoneClient(speechRecognitionMode, language, primaryKey, secondaryKey) {
-                    return new SpeechRecognition.MicrophoneRecognitionClient(createPrefs(speechRecognitionMode, language, primaryKey, secondaryKey));
+                    return new SpeechRecognition.MicrophoneRecognitionClient(createPrefs(speechRecognitionMode, language, primaryKey));
                 }
                 SpeechRecognitionServiceFactory.createMicrophoneClient = createMicrophoneClient;
-                function createMicrophoneClientWithIntent(language, primaryKey, secondaryKey, luisAppId, luisSubscriptionId) {
-                    var prefs = createPrefs(SpeechRecognition.SpeechRecognitionMode.shortPhrase, language, primaryKey, secondaryKey);
+                function createMicrophoneClientWithIntent(language, primaryKey, luisAppId, luisSubscriptionId) {
+                    var prefs = createPrefs(SpeechRecognition.SpeechRecognitionMode.shortPhrase, language, primaryKey);
                     prefs.luisAppId = luisAppId;
                     prefs.luisSubscriptionId = luisSubscriptionId;
                     return new SpeechRecognition.MicrophoneRecognitionClient(prefs);
                 }
                 SpeechRecognitionServiceFactory.createMicrophoneClientWithIntent = createMicrophoneClientWithIntent;
-                SpeechRecognitionServiceFactory.BaseSpeechUrl = "https://websockets.platform.bing.com/ws/speech/recognize";
-                function createPrefs(speechRecognitionMode, language, primaryKey, secondaryKey) {
+                SpeechRecognitionServiceFactory.BaseSpeechUrl = "https://speech.platform.bing.com/recognize";
+                function createPrefs(speechRecognitionMode, language, primaryKey) {
                     var serviceUri = SpeechRecognitionServiceFactory.BaseSpeechUrl;
                     switch(speechRecognitionMode) {
                         case SpeechRecognition.SpeechRecognitionMode.longDictation:
-                            serviceUri += "/continuous";
-                            break;
+                            throw "SpeechRecognitionMode.longDictation is not a currently supported mode.";
                     }
                     return {
                         serviceUri: serviceUri,
                         locale: language,
                         clientId: primaryKey,
-                        clientSecret: secondaryKey,
                         clientVersion: "4.0.150429",
                         authenticationScheme: "MAIS"
                     };
@@ -157,10 +155,10 @@ var Microsoft;
                 SpeechRecognitionServiceFactory.createPrefs = createPrefs;
             })(SpeechRecognition.SpeechRecognitionServiceFactory || (SpeechRecognition.SpeechRecognitionServiceFactory = {}));
             var SpeechRecognitionServiceFactory = SpeechRecognition.SpeechRecognitionServiceFactory;
-        })(ProjectOxford.SpeechRecognition || (ProjectOxford.SpeechRecognition = {}));
-        var SpeechRecognition = ProjectOxford.SpeechRecognition;
-    })(Microsoft.ProjectOxford || (Microsoft.ProjectOxford = {}));
-    var ProjectOxford = Microsoft.ProjectOxford;
+        })(CognitiveServices.SpeechRecognition || (CognitiveServices.SpeechRecognition = {}));
+        var SpeechRecognition = CognitiveServices.SpeechRecognition;
+    })(Microsoft.CognitiveServices || (Microsoft.CognitiveServices = {}));
+    var CognitiveServices = Microsoft.CognitiveServices;
 })(Microsoft || (Microsoft = {}));
 var Bing;
 (function (Bing) {
@@ -677,32 +675,44 @@ var Bing;
         return xhr.response;
     }
     Bing.handleJSONWebResponse = handleJSONWebResponse;
-    var OxfordAuthenticator = (function () {
-        function OxfordAuthenticator() {
+    var Guid = (function () {
+        function Guid() { }
+        Guid.generateString = function generateString() {
+            return Guid.getRnd4HexOctet() + Guid.getRnd4HexOctet() + "-" + Guid.getRnd4HexOctet() + "-" + Guid.getRndGuidTimeHiAndVersionHex() + "-" + Guid.getRndGuidClockSeqHiAndReservedHex() + "-" + Guid.getRnd4HexOctet() + Guid.getRnd4HexOctet() + Guid.getRnd4HexOctet();
+        };
+        Guid.generate16bitRnd = function generate16bitRnd() {
+            return Math.random() * 0x10000 | 0;
+        };
+        Guid.getRnd4HexOctet = function getRnd4HexOctet() {
+            return ("0000" + Guid.generate16bitRnd().toString(16)).slice(-4);
+        };
+        Guid.getRndGuidTimeHiAndVersionHex = function getRndGuidTimeHiAndVersionHex() {
+            return (Guid.generate16bitRnd() & 0x0FFF | 0x4000).toString(16);
+        };
+        Guid.getRndGuidClockSeqHiAndReservedHex = function getRndGuidClockSeqHiAndReservedHex() {
+            return (Guid.generate16bitRnd() & 0x3FFF | 0x8000).toString(16);
+        };
+        return Guid;
+    })();
+    Bing.Guid = Guid;    
+    var CognitiveServiceAuthenticator = (function () {
+        function CognitiveServiceAuthenticator() {
         }
-        OxfordAuthenticator.prototype.authenticate = function (primaryKey, secondaryKey) {
+        CognitiveServiceAuthenticator.prototype.authenticate = function (primaryKey, secondaryKey) {
             var _this = this;
             var task = new Task();
             var now = Date.now();
-            var params = [
-                "grant_type=client_credentials&client_id=", 
-                encodeURIComponent(primaryKey), 
-                "&client_secret=", 
-                encodeURIComponent(secondaryKey), 
-                "&scope=", 
-                encodeURIComponent("https://speech.platform.bing.com")
-            ].join("");
-            if (!this._response || !this._expireTime || Date.now() >= this._expireTime.getTime()) {
+            if (!this._access_token || !this._expireTime || Date.now() >= this._expireTime.getTime()) {
                 writeline("refreshing token");
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', "https://oxford-speech.cloudapp.net/token/issueToken", true);
-                xhr.responseType = 'json';
+                xhr.open('POST', "https://api.cognitive.microsoft.com/sts/v1.0/issueToken", true);
                 xhr.onload = function () {
                     if (xhr.readyState == 4) {
                         if (xhr.status === 200) {
-                            _this._response = handleJSONWebResponse(xhr);
-                            _this._expireTime = new Date(Date.now() + parseInt(_this._response.expires_in) * 1000);
-                            task.resolve("Bearer " + _this._response.access_token);
+                            _this._access_token = xhr.response;
+                            _this._response = JSON.parse(atob(_this._access_token.split(".")[1]));
+                            _this._expireTime = new Date(_this._response.exp * 1000);
+                            task.resolve("Bearer " + _this._access_token);
                         } else {
                             task.resolve(null);
                         }
@@ -711,14 +721,14 @@ var Bing;
                 xhr.onerror = function () {
                     task.resolve(null);
                 };
-                xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                xhr.send(params);
+                xhr.setRequestHeader("Ocp-Apim-Subscription-Key", primaryKey);
+                xhr.send();
             } else {
-                task.resolve("Bearer " + this._response.access_token);
+                task.resolve("Bearer " + this._access_token);
             }
             return task;
         };
-        return OxfordAuthenticator;
+        return CognitiveServiceAuthenticator;
     })();    
     var AdmAuthenticator = (function () {
         function AdmAuthenticator() {
@@ -747,8 +757,14 @@ var Bing;
         };
         return AdmAuthenticator;
     })();    
+    (function (WaveFormat) {
+        WaveFormat._map = [];
+        WaveFormat.PcmInt = 1;
+        WaveFormat.PcmFloat = 3;
+    })(Bing.WaveFormat || (Bing.WaveFormat = {}));
+    var WaveFormat = Bing.WaveFormat;
     var Riff = (function () {
-        function Riff(sampleRate, bitsPerSample) {
+        function Riff(sampleRate, bitsPerSample, format) {
             this._buffer = [];
             this._bitsPerSample = 8;
             this._channels = 1;
@@ -759,7 +775,7 @@ var Bing;
             this.appendUINT32(0);
             this.appendString("WAVEfmt ");
             this.appendUINT32(2 + 2 + 4 + 4 + 2 + 2);
-            this.appendUINT16(Riff.WAVE_FORMAT_PCM);
+            this.appendUINT16(format);
             this.appendUINT16(this._channels);
             this.appendUINT32(this._sampleRate);
             this.appendUINT32(this._sampleRate * (this._bitsPerSample >> 3) * this._channels);
@@ -768,8 +784,6 @@ var Bing;
             this.appendString("data");
             this.appendUINT32(0);
         }
-        Riff.WAVE_FORMAT_PCM = 1;
-        Riff.WAVE_FORMAT_IEEE_FLOAT = 3;
         Riff.prototype.appendString = function (s) {
             for(var i = 0; i < s.length; ++i) {
                 this._buffer.push(s.charCodeAt(i));
@@ -793,7 +807,7 @@ var Bing;
             this._prefs = prefs;
             switch(prefs.authenticationScheme) {
                 case "MAIS":
-                    this._auth = new OxfordAuthenticator();
+                    this._auth = new CognitiveServiceAuthenticator();
                     break;
                 case "ADM":
                     this._auth = new AdmAuthenticator();
@@ -833,7 +847,8 @@ var Bing;
         return HTTPResultStatus;
     })();    
     var HttpClient = (function () {
-        function HttpClient() {
+        function HttpClient(waveFormat) {
+            if (typeof waveFormat === "undefined") { waveFormat = WaveFormat.PcmInt; }
             this.queue = [];
             this.responseFormat = "json";
             writeline("Defaulting to http client");
@@ -841,8 +856,8 @@ var Bing;
             this.requestUri += "&appid=D4D52672-91D7-4C74-8AD8-42B1D98141A5";
             this.requestUri += "&device.os=wp7";
             this.requestUri += "&version=3.0";
-            this.requestUri += "&instanceid=565D69FF-E928-4B7E-87DA-9A750B96D9E3";
-            this.requestUri += "&requestid=" + "2065F912-3699-408C-A80A-9D17F42B9692";
+            this.requestUri += "&instanceid=" + Bing.Guid.generateString();
+            this.waveFormat = waveFormat;
         }
         HttpClient.prototype.removeEventListener = function (type, listener, useCapture) {
         };
@@ -864,8 +879,21 @@ var Bing;
                 this.luis = new LuisClient(this.preferences);
             }
             this.queue = [];
-            this.buffer = new Int8Array(new Riff(this.sampleRate, 8).toByteArray());
-            this.offset = this.buffer.length;
+            this.buffer = new ArrayBuffer(4096);
+            var view = new Uint8Array(this.buffer);
+            switch(this.waveFormat) {
+                default:
+                case WaveFormat.PcmInt:
+                    var riffHeader = new Riff(this.sampleRate, 8, WaveFormat.PcmInt).toByteArray();
+                    this.processAudio = this.appendAsUInt8;
+                    break;
+                case WaveFormat.PcmFloat:
+                    var riffHeader = new Riff(this.sampleRate, 32, WaveFormat.PcmFloat).toByteArray();
+                    this.processAudio = this.appendAsFloat32;
+                    break;
+            }
+            view.set(riffHeader);
+            this.offset = riffHeader.length;
         };
         HttpClient.prototype.disconnect = function () {
             if (this.connected) {
@@ -890,7 +918,7 @@ var Bing;
         HttpClient.prototype.sendText = function (inputText) {
         };
         HttpClient.prototype.audioprocess = function (buffer) {
-            this.appendAsUInt8(buffer.getChannelData(0));
+            this.processAudio(buffer.getChannelData(0));
         };
         HttpClient.prototype.tts = function (text, contentType, outputFormat) {
             var _this = this;
@@ -942,7 +970,7 @@ var Bing;
             if (!this.auth) {
                 switch(this.preferences.authenticationScheme) {
                     case "MAIS":
-                        this.auth = new OxfordAuthenticator();
+                        this.auth = new CognitiveServiceAuthenticator();
                         break;
                     case "ADM":
                         this.auth = new AdmAuthenticator();
@@ -968,7 +996,9 @@ var Bing;
                     "&locale=", 
                     _this.preferences.locale, 
                     "&format=", 
-                    _this.responseFormat
+                    _this.responseFormat, 
+                    "&requestid=", 
+                    Bing.Guid.generateString()
                 ].join(""), true);
                 request.responseType = _this.responseFormat;
                 request.setRequestHeader("Content-Type", 'audio/wav; codec="audio/pcm"; samplerate=' + _this.sampleRate);
@@ -986,8 +1016,9 @@ var Bing;
                         }
                     }
                 };
-                if (_this.buffer && _this.buffer.length) {
-                    request.send(_this.buffer);
+                if (_this.buffer && _this.buffer.byteLength && _this.offset) {
+                    var view = new Uint8Array(_this.buffer, 0, _this.offset);
+                    request.send(view);
                 }
             });
         };
@@ -1040,15 +1071,36 @@ var Bing;
             }
         };
         HttpClient.prototype.appendAsUInt8 = function (a) {
-            var newBuffer;
-            newBuffer = new Int8Array(a.length + this.offset);
-            if (this.buffer) {
-                newBuffer.set(this.buffer, 0);
-            }
-            this.buffer = newBuffer;
+            var _this = this;
+            this.appendData(a, function () {
+                return new Int8Array(_this.buffer, _this.offset);
+            }, 1, function (s) {
+                return Math.floor(s * 128);
+            });
+        };
+        HttpClient.prototype.appendAsFloat32 = function (a) {
+            var _this = this;
+            this.appendData(a, function () {
+                return new Float32Array(_this.buffer, _this.offset);
+            }, 4, function (s) {
+                return s;
+            });
+        };
+        HttpClient.prototype.appendData = function (a, getViewProvider, outputSampleSize, convertSample) {
             var incrementBy = this.sourceSampleRate / this.sampleRate;
-            for(var i = 0; i < a.length; i += incrementBy) {
-                this.buffer[this.offset++] = Math.floor((a[Math.floor(i)] - .5) * 128);
+            var requiredElements = ((a.length / incrementBy) | 0) + 1;
+            var requiredSpace = requiredElements * outputSampleSize;
+            if (this.buffer.byteLength < this.offset + requiredSpace) {
+                var newLength = (this.offset + requiredSpace) * 2;
+                newLength += newLength % outputSampleSize;
+                var newBuffer = new ArrayBuffer(newLength);
+                new Uint8Array(newBuffer).set(new Uint8Array(this.buffer));
+                this.buffer = newBuffer;
+            }
+            var view = getViewProvider();
+            for(var di = 0, si = 0; si < a.length; ++di, si += incrementBy) {
+                view[di] = convertSample(a[Math.floor(si)]);
+                this.offset += outputSampleSize;
             }
         };
         HttpClient.prototype.renderAudio = function (context, audioData) {
