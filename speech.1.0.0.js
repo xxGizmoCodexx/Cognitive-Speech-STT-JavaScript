@@ -766,9 +766,7 @@ var Bing;
     var Riff = (function () {
         function Riff(sampleRate, bitsPerSample, format) {
             this._buffer = [];
-            this._bitsPerSample = 8;
             this._channels = 1;
-            this._sampleRate = 44100;
             this._bitsPerSample = bitsPerSample;
             this._sampleRate = sampleRate;
             this.appendString("RIFF");
@@ -781,6 +779,8 @@ var Bing;
             this.appendUINT32(this._sampleRate * (this._bitsPerSample >> 3) * this._channels);
             this.appendUINT16(this._bitsPerSample >> 3);
             this.appendUINT16(this._bitsPerSample);
+
+            // TODO: Wrap data chunk after size is known or use sub-chunks?
             this.appendString("data");
             this.appendUINT32(0);
         }
@@ -801,7 +801,7 @@ var Bing;
             return this._buffer;
         };
         return Riff;
-    })();    
+    })();
     var LuisClient = (function () {
         function LuisClient(prefs) {
             this._prefs = prefs;
@@ -848,7 +848,7 @@ var Bing;
     })();    
     var HttpClient = (function () {
         function HttpClient(waveFormat) {
-            if (typeof waveFormat === "undefined") { waveFormat = WaveFormat.PcmInt; }
+            if (typeof waveFormat === "undefined") { waveFormat = WaveFormat.PcmFloat; }
             this.queue = [];
             this.responseFormat = "json";
             writeline("Defaulting to http client");
@@ -881,15 +881,16 @@ var Bing;
             this.queue = [];
             this.buffer = new ArrayBuffer(4096);
             var view = new Uint8Array(this.buffer);
-            switch(this.waveFormat) {
+            var riffHeader;
+            switch (this.waveFormat) {
                 default:
-                case WaveFormat.PcmInt:
-                    var riffHeader = new Riff(this.sampleRate, 8, WaveFormat.PcmInt).toByteArray();
-                    this.processAudio = this.appendAsUInt8;
-                    break;
                 case WaveFormat.PcmFloat:
-                    var riffHeader = new Riff(this.sampleRate, 32, WaveFormat.PcmFloat).toByteArray();
+                    riffHeader = new Riff(this.sampleRate, 32, WaveFormat.PcmFloat).toByteArray();
                     this.processAudio = this.appendAsFloat32;
+                    break;
+                case WaveFormat.PcmInt:
+                    riffHeader = new Riff(this.sampleRate, 8, WaveFormat.PcmInt).toByteArray();
+                    this.processAudio = this.appendAsUInt8;
                     break;
             }
             view.set(riffHeader);
