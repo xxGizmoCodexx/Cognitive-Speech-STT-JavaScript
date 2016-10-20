@@ -5,3 +5,4 @@
 /obj/Debug
 /bin
 /.vs/config/applicationhost.config
+*.suo
